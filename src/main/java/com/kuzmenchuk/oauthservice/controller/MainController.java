@@ -1,24 +1,28 @@
 package com.kuzmenchuk.oauthservice.controller;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.kuzmenchuk.oauthservice.exception.UserAlreadyExistException;
 import com.kuzmenchuk.oauthservice.repository.entities.AppUser;
 import com.kuzmenchuk.oauthservice.service.AppUserService;
 import com.kuzmenchuk.oauthservice.util.CustomResponse;
-import javafx.geometry.Pos;
+import com.kuzmenchuk.oauthservice.util.RegistrationUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class MainController {
     private final AppUserService appUserService;
     private final HttpServletRequest request;
+
+    @Value("${security.oauth2.client.client-id}")
+    private String CLIENT_ID;
+    @Value("${security.oauth2.client.client-secret}")
+    private String CLIENT_SECRET;
 
     private CustomResponse successResponseBody = CustomResponse.builder().build();
     private CustomResponse errorResponseBody = CustomResponse.builder().build();
@@ -40,10 +44,10 @@ public class MainController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity<CustomResponse> reg(@RequestBody AppUser appUser) {
+    public ResponseEntity<CustomResponse> reg(@RequestBody RegistrationUserRequest user) {
         try {
 
-            AppUser newUser = appUserService.addNewUser(appUser);
+            AppUser newUser = appUserService.addNewUser(user);
             successResponseBody = CustomResponse.successResponse("New user registered successfully!", newUser, request.getRequestURI());
 
             return ResponseEntity

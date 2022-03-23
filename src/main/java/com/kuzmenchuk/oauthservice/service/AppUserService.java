@@ -4,6 +4,7 @@ import com.kuzmenchuk.oauthservice.exception.UserAlreadyExistException;
 import com.kuzmenchuk.oauthservice.repository.AppUserRepository;
 import com.kuzmenchuk.oauthservice.repository.entities.AppUser;
 import com.kuzmenchuk.oauthservice.repository.entities.Role;
+import com.kuzmenchuk.oauthservice.util.RegistrationUserRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class AppUserService {
     }
 
     @Transactional(dontRollbackOn = Exception.class)
-    public AppUser addNewUser(AppUser user) {
+    public AppUser addNewUser(RegistrationUserRequest user) {
         Optional<AppUser> userFromDB = appUserRepository.findByUsername(user.getUsername());
         if (userFromDB.isPresent()) {
             throw new UserAlreadyExistException("User " + user.getUsername() + " is exists!");
