@@ -7,7 +7,6 @@ import com.kuzmenchuk.oauthservice.util.CustomResponse;
 import com.kuzmenchuk.oauthservice.util.RegistrationUserRequest;
 import com.kuzmenchuk.oauthservice.util.UpdateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,13 +21,8 @@ public class MainController {
     private final AppUserService appUserService;
     private final HttpServletRequest request;
 
-    @Value("${security.oauth2.client.client-id}")
-    private String CLIENT_ID;
-    @Value("${security.oauth2.client.client-secret}")
-    private String CLIENT_SECRET;
-
-    private CustomResponse successResponseBody = CustomResponse.builder().build();
-    private CustomResponse errorResponseBody = CustomResponse.builder().build();
+    private CustomResponse successResponseBody = new CustomResponse();
+    private CustomResponse errorResponseBody = new CustomResponse();
 
     @Autowired
     public MainController(AppUserService appUserService, HttpServletRequest request) {

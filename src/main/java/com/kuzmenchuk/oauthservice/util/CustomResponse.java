@@ -28,6 +28,9 @@ public class CustomResponse {
     private Object body;
     private List<String> error;
 
+    public CustomResponse() {
+    }
+
     /**
      * Create success response body
      * <p>
