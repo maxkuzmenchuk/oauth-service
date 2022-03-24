@@ -1,27 +1,30 @@
 package com.kuzmenchuk.oauthservice.controller;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.kuzmenchuk.oauthservice.exception.UserAlreadyExistException;
 import com.kuzmenchuk.oauthservice.repository.entities.AppUser;
 import com.kuzmenchuk.oauthservice.service.AppUserService;
 import com.kuzmenchuk.oauthservice.util.CustomResponse;
-import javafx.geometry.Pos;
+import com.kuzmenchuk.oauthservice.util.requests.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/user-account")
 public class MainController {
     private final AppUserService appUserService;
     private final HttpServletRequest request;
 
-    private CustomResponse successResponseBody = CustomResponse.builder().build();
-    private CustomResponse errorResponseBody = CustomResponse.builder().build();
+    private CustomResponse successResponseBody = new CustomResponse();
+    private CustomResponse errorResponseBody = new CustomResponse();
 
     @Autowired
     public MainController(AppUserService appUserService, HttpServletRequest request) {
@@ -29,22 +32,12 @@ public class MainController {
         this.request = request;
     }
 
-    @GetMapping(value = "/")
-    public String index() {
-        return "Hello world";
-    }
-
-    @GetMapping(value = "/private")
-    public String privateArea() {
-        return "Private area";
-    }
-
-    @PostMapping("/registration")
-    public ResponseEntity<CustomResponse> reg(@RequestBody AppUser appUser) {
+    @PostMapping("/auth/registration")
+    public ResponseEntity<CustomResponse> add(@RequestBody RegistrationUserRequest user) {
         try {
 
-            AppUser newUser = appUserService.addNewUser(appUser);
-            successResponseBody = CustomResponse.successResponse("New user registered successfully!", newUser, request.getRequestURI());
+            AppUser newUser = appUserService.addNewUser(user);
+            successResponseBody = CustomResponse.successResponse("New user registered successfully!", "newUser", newUser, request.getRequestURI());
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -65,11 +58,11 @@ public class MainController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<CustomResponse> updateUser(@RequestBody AppUser appUser) {
+    @Secured({"ROLE_ADMIN"})
+    public ResponseEntity<CustomResponse> update(@RequestParam("id") Long id, @RequestBody UpdateUserRequest appUser) {
         try {
-
-            AppUser updUser = appUserService.save(appUser);
-            successResponseBody = CustomResponse.successResponse("User updated successfully!", updUser, request.getRequestURI());
+            AppUser updUser = appUserService.update(id, appUser);
+            successResponseBody = CustomResponse.successResponse("User updated successfully!", "updUser", updUser, request.getRequestURI());
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -88,4 +81,120 @@ public class MainController {
                     .body(errorResponseBody);
         }
     }
+
+    @DeleteMapping("/delete")
+    @Secured({"ROLE_ADMIN"})
+    public ResponseEntity<CustomResponse> delete(@RequestBody DeleteUserRequest deleteUserRequest) {
+        try {
+            List<Long> deletedIDs = appUserService.deleteUserById(deleteUserRequest);
+            successResponseBody = CustomResponse.successResponse("Users are deleted successfully", "IDs", deletedIDs, request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (DataAccessException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.FORBIDDEN, e.getMessage(), request.getRequestURI());
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
+
+    @PutMapping("/deactivate-account")
+    @Secured({"ROLE_ADMIN"})
+    public ResponseEntity<CustomResponse> deactivate(@RequestBody DeactivateUserRequest deactivateUserRequest) {
+        try {
+            List<Long> deactivatedIDs = appUserService.deactivateById(deactivateUserRequest);
+            successResponseBody = CustomResponse.successResponse("Users are deactivated successfully", "IDs", deactivatedIDs, request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (DataAccessException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.FORBIDDEN, e.getMessage(), request.getRequestURI());
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
+
+    @PutMapping("/change-role")
+    @Secured({"ROLE_ADMIN"})
+    public ResponseEntity<CustomResponse> changeRole(@RequestBody ChangeRoleRequest changeRoleRequest) {
+        try {
+            Map<String, Object> result = appUserService.changeRoleById(changeRoleRequest);
+            successResponseBody = CustomResponse.successResponse("Users roles are changed successfully", "roles", result, request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (DataAccessException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.FORBIDDEN, e.getMessage(), request.getRequestURI());
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
+
+    @GetMapping("/get-all-accounts")
+    private ResponseEntity<CustomResponse> getAllUsers() {
+        try {
+            List<AppUser> appUserList = appUserService.getAll();
+            successResponseBody = CustomResponse.successResponse("Success", "appUserList", appUserList, request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
+
+    @GetMapping("/get-account-by-id")
+    public ResponseEntity<CustomResponse> getUserById(@RequestParam("id") Long id) {
+        try {
+            AppUser user = appUserService.getAccountById(id);
+            successResponseBody = CustomResponse.successResponse("Success", "appUser", user, request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (UsernameNotFoundException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
+
+
 }
