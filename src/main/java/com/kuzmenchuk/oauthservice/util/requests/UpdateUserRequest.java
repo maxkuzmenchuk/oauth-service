@@ -1,4 +1,4 @@
-package com.kuzmenchuk.oauthservice.util;
+package com.kuzmenchuk.oauthservice.util.requests;
 
 import com.kuzmenchuk.oauthservice.repository.entities.Role;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import java.util.Set;
 @Getter
 @Setter
 public class UpdateUserRequest {
-    private Long id;
     private String username;
     private String password;
     private Set<Role> roles;

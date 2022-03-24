@@ -4,16 +4,13 @@ import com.kuzmenchuk.oauthservice.exception.UserAlreadyExistException;
 import com.kuzmenchuk.oauthservice.repository.AppUserRepository;
 import com.kuzmenchuk.oauthservice.repository.entities.AppUser;
 import com.kuzmenchuk.oauthservice.repository.entities.Role;
-import com.kuzmenchuk.oauthservice.util.RegistrationUserRequest;
-import com.kuzmenchuk.oauthservice.util.UpdateUserRequest;
+import com.kuzmenchuk.oauthservice.util.requests.*;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class AppUserService {
@@ -26,8 +23,8 @@ public class AppUserService {
     }
 
     @Transactional(dontRollbackOn = Exception.class)
-    public AppUser update(UpdateUserRequest user) {
-        Optional<AppUser> appUserDB = appUserRepository.findById(user.getId());
+    public AppUser update(Long id, UpdateUserRequest user) {
+        Optional<AppUser> appUserDB = appUserRepository.findById(id);
         AppUser appUser;
 
         if (!appUserDB.isPresent()) {
@@ -60,6 +57,59 @@ public class AppUserService {
                 .build();
 
         return appUserRepository.saveAndFlush(newUser);
+    }
+
+    @Transactional
+    public List<Long> deleteUserById(DeleteUserRequest deleteUserRequest) {
+        List<Long> deletedIDs = new ArrayList<>();
+        Long[] ids = deleteUserRequest.getDeleteIDs();
+        Long authUserID = deleteUserRequest.getAuthUserID();
+
+        for (Long id : ids) {
+            if (!Objects.equals(id, authUserID)) {
+                appUserRepository.deleteById(id);
+                deletedIDs.add(id);
+            }
+        }
+
+        return deletedIDs;
+    }
+
+    @Transactional
+    public List<Long> deactivateById(DeactivateUserRequest deactivateUserRequest) {
+        List<Long> deactivatedIDs = new ArrayList<>();
+
+        Long[] ids = deactivateUserRequest.getDeactivateIDs();
+        Long authUserID = deactivateUserRequest.getAuthUserID();
+
+        for (Long id : ids) {
+            if (!Objects.equals(id, authUserID)) {
+                appUserRepository.deactivateUser(id);
+                deactivatedIDs.add(id);
+            }
+        }
+
+        return deactivatedIDs;
+    }
+
+    @Transactional
+    public Map<String, Object> changeRoleById(ChangeRoleRequest changeRoleRequest) {
+        Optional<AppUser> userDB = appUserRepository.findById(changeRoleRequest.getUserID());
+        AppUser appUser;
+        if (!userDB.isPresent()) {
+            throw new UsernameNotFoundException("User not found!");
+        } else {
+            appUser = userDB.get();
+            appUser.setRoles(changeRoleRequest.getRoles());
+        }
+
+        appUserRepository.saveAndFlush(appUser);
+
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("userID", changeRoleRequest.getUserID());
+        resultMap.put("roles", changeRoleRequest.getRoles());
+
+        return resultMap;
     }
 
     public List<AppUser> getAll() {

@@ -1,4 +1,4 @@
-package com.kuzmenchuk.oauthservice.util;
+package com.kuzmenchuk.oauthservice.util.requests;
 
 import lombok.Getter;
 import lombok.Setter;

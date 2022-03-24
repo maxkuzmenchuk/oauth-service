@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author kuzmenchuk
@@ -17,6 +19,8 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class CustomResponse {
     private Timestamp timestamp;
@@ -24,42 +28,25 @@ public class CustomResponse {
     private int statusCode;
     private HttpStatus status;
     private String requestUrl;
-    private String message;
     private Object body;
     private List<String> error;
 
-    public CustomResponse() {
-    }
 
-    /**
-     * Create success response body
-     * <p>
-     *
-     * @param body       {@link Object}  to be installed in the response {@code body} field
-     * @param requestUrl {@code RequestMapping} value from the controller being called
-     * @return {@link CustomResponse} object value for the body in the {@link org.springframework.http.ResponseEntity}
-     */
-    public static CustomResponse successResponse(String message, Object body, String requestUrl) {
+    public static CustomResponse successResponse(String message, String bodyField, Object bodyValue, String requestUrl) {
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("message", message);
+        bodyMap.put(bodyField, bodyValue);
         return CustomResponse.builder()
                 .timestamp(Timestamp.valueOf(LocalDateTime.now()))
                 .success(1)
                 .statusCode(HttpStatus.OK.value())
                 .status(HttpStatus.OK)
                 .requestUrl(requestUrl)
-                .message(message)
-                .body(body)
+                .body(bodyMap)
                 .error(Collections.emptyList())
                 .build();
     }
 
-    /**
-     * Create {@code INTERNAL_SERVER_ERROR} error response body
-     * <p>
-     *
-     * @param error      exception message
-     * @param requestUrl {@code RequestMapping} value from the controller being called
-     * @return {@link CustomResponse} object value for the body in the {@link org.springframework.http.ResponseEntity}
-     */
     public static CustomResponse errorResponse(HttpStatus status, String error, String requestUrl) {
         return CustomResponse.builder()
                 .timestamp(Timestamp.valueOf(LocalDateTime.now()))
@@ -72,14 +59,6 @@ public class CustomResponse {
                 .build();
     }
 
-    /**
-     * Create {@code FORBIDDEN} error response body
-     * <p>
-     *
-     * @param error      exception messages list
-     * @param requestUrl {@code RequestMapping} value from the controller being called
-     * @return {@link CustomResponse} object value for the body in the {@link org.springframework.http.ResponseEntity}
-     */
     public static CustomResponse forbiddenResponse(String error, String requestUrl) {
         return CustomResponse.builder()
                 .timestamp(Timestamp.valueOf(LocalDateTime.now()))
@@ -92,13 +71,6 @@ public class CustomResponse {
                 .build();
     }
 
-    /**
-     * Create {@code BAD_REQUEST} error response body for validation errors
-     *
-     * @param errors     exception messages list
-     * @param requestUrl request url
-     * @return {@link CustomResponse} object value for the body in the {@link org.springframework.http.ResponseEntity}
-     */
     public static CustomResponse validationErrorResponse(List<String> errors, String requestUrl) {
         return CustomResponse.builder()
                 .timestamp(Timestamp.valueOf(LocalDateTime.now()))
