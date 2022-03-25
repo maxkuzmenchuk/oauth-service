@@ -9,12 +9,14 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final TokenStore tokenStore;
 
     @Value("${security.oauth2.client.client-id}")
     private String CLIENT_ID;
@@ -25,14 +27,16 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Value("${security.oauth2.client.scope}")
     private String SCOPE;
 
-    public AuthorizationServerConfig(AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
+    public AuthorizationServerConfig(AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenStore tokenStore) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
+        this.tokenStore = tokenStore;
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
+                .tokenStore(tokenStore)
                 .authenticationManager(authenticationManager);
     }
 
