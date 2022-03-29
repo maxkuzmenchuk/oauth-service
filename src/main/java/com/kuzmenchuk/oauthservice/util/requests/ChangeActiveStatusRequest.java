@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DeactivateUserRequest {
+public class ChangeActiveStatusRequest {
     private Long authUserID;
-    private Long[] deactivateIDs;
+    private Long accountID;
+    private boolean status;
 }

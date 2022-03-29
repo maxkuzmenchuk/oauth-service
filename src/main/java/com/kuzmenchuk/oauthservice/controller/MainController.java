@@ -106,12 +106,12 @@ public class MainController {
         }
     }
 
-    @PutMapping("/deactivate-account")
+    @PutMapping("/change-active-status")
     @Secured({"ROLE_ADMIN"})
-    public ResponseEntity<CustomResponse> deactivate(@RequestBody DeactivateUserRequest deactivateUserRequest) {
+    public ResponseEntity<CustomResponse> deactivate(@RequestBody ChangeActiveStatusRequest changeActiveStatusRequest) {
         try {
-            List<Long> deactivatedIDs = appUserService.deactivateById(deactivateUserRequest);
-            successResponseBody = CustomResponse.successResponse("Users are deactivated successfully", "IDs", deactivatedIDs, request.getRequestURI());
+            Long updateUserID = appUserService.changeActiveStatus(changeActiveStatusRequest);
+            successResponseBody = CustomResponse.successResponse("Status active changed successfully", "updatedUserID", updateUserID, request.getRequestURI());
 
             return ResponseEntity
                     .status(HttpStatus.OK)

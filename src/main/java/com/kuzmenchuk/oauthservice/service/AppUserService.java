@@ -76,20 +76,18 @@ public class AppUserService {
     }
 
     @Transactional
-    public List<Long> deactivateById(DeactivateUserRequest deactivateUserRequest) {
-        List<Long> deactivatedIDs = new ArrayList<>();
+    public Long changeActiveStatus(ChangeActiveStatusRequest changeActiveStatusRequest) throws Exception {
+        Long accountID = changeActiveStatusRequest.getAccountID();
+        Long authUserID = changeActiveStatusRequest.getAuthUserID();
+        boolean status = changeActiveStatusRequest.isStatus();
 
-        Long[] ids = deactivateUserRequest.getDeactivateIDs();
-        Long authUserID = deactivateUserRequest.getAuthUserID();
-
-        for (Long id : ids) {
-            if (!Objects.equals(id, authUserID)) {
-                appUserRepository.deactivateUser(id);
-                deactivatedIDs.add(id);
-            }
+        if (!Objects.equals(accountID, authUserID)) {
+            appUserRepository.changeActiveStatus(status, accountID);
+        } else {
+            throw new Exception("You can't change status for yourself");
         }
 
-        return deactivatedIDs;
+        return accountID;
     }
 
     @Transactional
