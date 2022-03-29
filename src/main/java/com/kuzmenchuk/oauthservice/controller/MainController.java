@@ -155,7 +155,7 @@ public class MainController {
     }
 
     @GetMapping("/get-all-accounts")
-    private ResponseEntity<CustomResponse> getAllUsers() {
+    public ResponseEntity<CustomResponse> getAllUsers() {
         try {
             List<AppUser> appUserList = appUserService.getAll();
             successResponseBody = CustomResponse.successResponse("Success", "appUserList", appUserList, request.getRequestURI());
