@@ -123,4 +123,14 @@ public class AppUserService {
             throw new UsernameNotFoundException("User not found!");
         }
     }
+
+    public AppUser getAccountByUsername(String username) {
+        Optional<AppUser> user = appUserRepository.findByUsername(username);
+
+        if (user.isPresent()) {
+            return user.get();
+        } else {
+            throw new UsernameNotFoundException("User not found!");
+        }
+    }
 }

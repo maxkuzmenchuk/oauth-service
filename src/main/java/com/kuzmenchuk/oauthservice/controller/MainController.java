@@ -196,5 +196,27 @@ public class MainController {
         }
     }
 
+    @GetMapping("/get-account-by-username")
+    public ResponseEntity<CustomResponse> getUserByUsername(@RequestParam("username") String username) {
+        try {
+            AppUser user = appUserService.getAccountByUsername(username);
+            successResponseBody = CustomResponse.successResponse("Success", "appUser", user, request.getRequestURI());
 
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (UsernameNotFoundException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
 }
