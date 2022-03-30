@@ -43,10 +43,10 @@ public class MainController {
                     .status(HttpStatus.OK)
                     .body(successResponseBody);
         } catch (UserAlreadyExistException e) {
-            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
 
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(errorResponseBody);
         } catch (Exception exception) {
             errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
@@ -59,19 +59,19 @@ public class MainController {
 
     @PostMapping("/update")
     @Secured({"ROLE_ADMIN"})
-    public ResponseEntity<CustomResponse> update(@RequestParam("id") Long id, @RequestBody UpdateUserRequest appUser) {
+    public ResponseEntity<CustomResponse> update(@RequestBody UpdateUserRequest appUser) {
         try {
-            AppUser updUser = appUserService.update(id, appUser);
+            AppUser updUser = appUserService.update(appUser.getId(), appUser);
             successResponseBody = CustomResponse.successResponse("User updated successfully!", "updUser", updUser, request.getRequestURI());
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(successResponseBody);
         } catch (UserAlreadyExistException e) {
-            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
 
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(errorResponseBody);
         } catch (Exception exception) {
             errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
@@ -108,7 +108,7 @@ public class MainController {
 
     @PutMapping("/change-active-status")
     @Secured({"ROLE_ADMIN"})
-    public ResponseEntity<CustomResponse> deactivate(@RequestBody ChangeActiveStatusRequest changeActiveStatusRequest) {
+    public ResponseEntity<CustomResponse> changeActiveStatus(@RequestBody ChangeActiveStatusRequest changeActiveStatusRequest) {
         try {
             Long updateUserID = appUserService.changeActiveStatus(changeActiveStatusRequest);
             successResponseBody = CustomResponse.successResponse("Status active changed successfully", "updatedUserID", updateUserID, request.getRequestURI());
@@ -182,10 +182,10 @@ public class MainController {
                     .status(HttpStatus.OK)
                     .body(successResponseBody);
         } catch (UsernameNotFoundException e) {
-            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
 
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(errorResponseBody);
         } catch (Exception exception) {
             errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
@@ -206,10 +206,10 @@ public class MainController {
                     .status(HttpStatus.OK)
                     .body(successResponseBody);
         } catch (UsernameNotFoundException e) {
-            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
 
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(errorResponseBody);
         } catch (Exception exception) {
             errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());

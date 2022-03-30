@@ -32,7 +32,7 @@ public class AppUserService {
         } else {
             appUser = appUserDB.get();
             appUser.setUsername(user.getUsername());
-            if (!appUser.getPassword().equalsIgnoreCase(passwordEncoder.encode(user.getPassword()))) {
+            if (!appUser.getPassword().equalsIgnoreCase(user.getPassword())) {
                 appUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
             appUser.setActive(user.isActive());
@@ -46,7 +46,7 @@ public class AppUserService {
     public AppUser addNewUser(RegistrationUserRequest user) {
         Optional<AppUser> userFromDB = appUserRepository.findByUsername(user.getUsername());
         if (userFromDB.isPresent()) {
-            throw new UserAlreadyExistException("User " + user.getUsername() + " is exists!");
+            throw new UserAlreadyExistException("'" + user.getUsername() + "' is already exists!");
         }
 
         AppUser newUser = AppUser.builder()
