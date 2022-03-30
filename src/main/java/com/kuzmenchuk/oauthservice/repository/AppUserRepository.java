@@ -14,6 +14,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUsername(String username);
 
     @Modifying
-    @Query("UPDATE AppUser u SET u.active = false WHERE u.id = :id")
-    void deactivateUser(@Param("id") Long id);
+    @Query("UPDATE AppUser u SET u.active = :status WHERE u.id = :id")
+    void changeActiveStatus(@Param("status") boolean status, @Param("id") Long id);
 }

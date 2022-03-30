@@ -6,10 +6,9 @@ import lombok.Setter;
 
 import java.util.Set;
 
-@Getter
 @Setter
-public class UpdateUserRequest {
-    private Long id;
+@Getter
+public class AddNewUserByAdminRequest {
     private String username;
     private String password;
     private Set<Role> roles;

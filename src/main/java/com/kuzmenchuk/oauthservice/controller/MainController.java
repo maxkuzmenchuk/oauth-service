@@ -43,10 +43,34 @@ public class MainController {
                     .status(HttpStatus.OK)
                     .body(successResponseBody);
         } catch (UserAlreadyExistException e) {
-            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
 
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
+
+    @PostMapping("/add-new-account")
+    public ResponseEntity<CustomResponse> addNewByAdmin(@RequestBody AddNewUserByAdminRequest userByAdminRequest) {
+        try {
+            AppUser newUser = appUserService.addNewUser(userByAdminRequest);
+            successResponseBody = CustomResponse.successResponse("User added successfully!", "newUser", newUser, request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (UserAlreadyExistException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(errorResponseBody);
         } catch (Exception exception) {
             errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
@@ -59,19 +83,19 @@ public class MainController {
 
     @PostMapping("/update")
     @Secured({"ROLE_ADMIN"})
-    public ResponseEntity<CustomResponse> update(@RequestParam("id") Long id, @RequestBody UpdateUserRequest appUser) {
+    public ResponseEntity<CustomResponse> update(@RequestBody UpdateUserRequest appUser) {
         try {
-            AppUser updUser = appUserService.update(id, appUser);
+            AppUser updUser = appUserService.update(appUser.getId(), appUser);
             successResponseBody = CustomResponse.successResponse("User updated successfully!", "updUser", updUser, request.getRequestURI());
 
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(successResponseBody);
         } catch (UserAlreadyExistException e) {
-            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
 
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(errorResponseBody);
         } catch (Exception exception) {
             errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
@@ -106,12 +130,12 @@ public class MainController {
         }
     }
 
-    @PutMapping("/deactivate-account")
+    @PutMapping("/change-active-status")
     @Secured({"ROLE_ADMIN"})
-    public ResponseEntity<CustomResponse> deactivate(@RequestBody DeactivateUserRequest deactivateUserRequest) {
+    public ResponseEntity<CustomResponse> changeActiveStatus(@RequestBody ChangeActiveStatusRequest changeActiveStatusRequest) {
         try {
-            List<Long> deactivatedIDs = appUserService.deactivateById(deactivateUserRequest);
-            successResponseBody = CustomResponse.successResponse("Users are deactivated successfully", "IDs", deactivatedIDs, request.getRequestURI());
+            Long updateUserID = appUserService.changeActiveStatus(changeActiveStatusRequest);
+            successResponseBody = CustomResponse.successResponse("Status active changed successfully", "updatedUserID", updateUserID, request.getRequestURI());
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -155,7 +179,7 @@ public class MainController {
     }
 
     @GetMapping("/get-all-accounts")
-    private ResponseEntity<CustomResponse> getAllUsers() {
+    public ResponseEntity<CustomResponse> getAllUsers() {
         try {
             List<AppUser> appUserList = appUserService.getAll();
             successResponseBody = CustomResponse.successResponse("Success", "appUserList", appUserList, request.getRequestURI());
@@ -182,10 +206,10 @@ public class MainController {
                     .status(HttpStatus.OK)
                     .body(successResponseBody);
         } catch (UsernameNotFoundException e) {
-            errorResponseBody = CustomResponse.errorResponse(HttpStatus.CONFLICT, e.getMessage(), request.getRequestURI());
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
 
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(errorResponseBody);
         } catch (Exception exception) {
             errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
@@ -196,5 +220,27 @@ public class MainController {
         }
     }
 
+    @GetMapping("/get-account-by-username")
+    public ResponseEntity<CustomResponse> getUserByUsername(@RequestParam("username") String username) {
+        try {
+            AppUser user = appUserService.getAccountByUsername(username);
+            successResponseBody = CustomResponse.successResponse("Success", "appUser", user, request.getRequestURI());
 
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (UsernameNotFoundException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
 }

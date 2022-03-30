@@ -31,8 +31,16 @@ public class AppUserService {
             throw new UsernameNotFoundException("User not found");
         } else {
             appUser = appUserDB.get();
-            appUser.setUsername(user.getUsername());
-            if (!appUser.getPassword().equalsIgnoreCase(passwordEncoder.encode(user.getPassword()))) {
+            if (!appUser.getUsername().equalsIgnoreCase(user.getUsername())) {
+                Optional<AppUser> userWithNewUsername = appUserRepository.findByUsername(user.getUsername());
+                if (userWithNewUsername.isPresent()) {
+                    throw new UserAlreadyExistException("Account with username '" + user.getUsername() + "' is already exists");
+                } else {
+                    appUser.setUsername(user.getUsername());
+                }
+            }
+
+            if (!appUser.getPassword().equalsIgnoreCase(user.getPassword())) {
                 appUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
             appUser.setActive(user.isActive());
@@ -46,7 +54,7 @@ public class AppUserService {
     public AppUser addNewUser(RegistrationUserRequest user) {
         Optional<AppUser> userFromDB = appUserRepository.findByUsername(user.getUsername());
         if (userFromDB.isPresent()) {
-            throw new UserAlreadyExistException("User " + user.getUsername() + " is exists!");
+            throw new UserAlreadyExistException("'" + user.getUsername() + "' is already exists!");
         }
 
         AppUser newUser = AppUser.builder()
@@ -58,6 +66,24 @@ public class AppUserService {
 
         return appUserRepository.saveAndFlush(newUser);
     }
+
+    @Transactional(dontRollbackOn = Exception.class)
+    public AppUser addNewUser(AddNewUserByAdminRequest user) {
+        Optional<AppUser> userFromDB = appUserRepository.findByUsername(user.getUsername());
+        if (userFromDB.isPresent()) {
+            throw new UserAlreadyExistException("'" + user.getUsername() + "' is already exists!");
+        }
+
+        AppUser newUser = AppUser.builder()
+                .username(user.getUsername().trim())
+                .password(passwordEncoder.encode(user.getPassword().trim()))
+                .roles(user.getRoles())
+                .active(user.isActive())
+                .build();
+
+        return appUserRepository.saveAndFlush(newUser);
+    }
+
 
     @Transactional
     public List<Long> deleteUserById(DeleteUserRequest deleteUserRequest) {
@@ -76,20 +102,18 @@ public class AppUserService {
     }
 
     @Transactional
-    public List<Long> deactivateById(DeactivateUserRequest deactivateUserRequest) {
-        List<Long> deactivatedIDs = new ArrayList<>();
+    public Long changeActiveStatus(ChangeActiveStatusRequest changeActiveStatusRequest) throws Exception {
+        Long accountID = changeActiveStatusRequest.getAccountID();
+        Long authUserID = changeActiveStatusRequest.getAuthUserID();
+        boolean status = changeActiveStatusRequest.isStatus();
 
-        Long[] ids = deactivateUserRequest.getDeactivateIDs();
-        Long authUserID = deactivateUserRequest.getAuthUserID();
-
-        for (Long id : ids) {
-            if (!Objects.equals(id, authUserID)) {
-                appUserRepository.deactivateUser(id);
-                deactivatedIDs.add(id);
-            }
+        if (!Objects.equals(accountID, authUserID)) {
+            appUserRepository.changeActiveStatus(status, accountID);
+        } else {
+            throw new Exception("You can't change status for yourself");
         }
 
-        return deactivatedIDs;
+        return accountID;
     }
 
     @Transactional
@@ -118,6 +142,16 @@ public class AppUserService {
 
     public AppUser getAccountById(Long id) {
         Optional<AppUser> user = appUserRepository.findById(id);
+
+        if (user.isPresent()) {
+            return user.get();
+        } else {
+            throw new UsernameNotFoundException("User not found!");
+        }
+    }
+
+    public AppUser getAccountByUsername(String username) {
+        Optional<AppUser> user = appUserRepository.findByUsername(username);
 
         if (user.isPresent()) {
             return user.get();
