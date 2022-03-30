@@ -57,6 +57,30 @@ public class MainController {
         }
     }
 
+    @PostMapping("/add-new-account")
+    public ResponseEntity<CustomResponse> addNewByAdmin(@RequestBody AddNewUserByAdminRequest userByAdminRequest) {
+        try {
+            AppUser newUser = appUserService.addNewUser(userByAdminRequest);
+            successResponseBody = CustomResponse.successResponse("User added successfully!", "newUser", newUser, request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (UserAlreadyExistException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+        }
+    }
+
     @PostMapping("/update")
     @Secured({"ROLE_ADMIN"})
     public ResponseEntity<CustomResponse> update(@RequestBody UpdateUserRequest appUser) {

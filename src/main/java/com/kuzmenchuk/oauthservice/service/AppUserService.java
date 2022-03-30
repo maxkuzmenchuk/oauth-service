@@ -31,7 +31,15 @@ public class AppUserService {
             throw new UsernameNotFoundException("User not found");
         } else {
             appUser = appUserDB.get();
-            appUser.setUsername(user.getUsername());
+            if (!appUser.getUsername().equalsIgnoreCase(user.getUsername())) {
+                Optional<AppUser> userWithNewUsername = appUserRepository.findByUsername(user.getUsername());
+                if (userWithNewUsername.isPresent()) {
+                    throw new UserAlreadyExistException("Account with username '" + user.getUsername() + "' is already exists");
+                } else {
+                    appUser.setUsername(user.getUsername());
+                }
+            }
+
             if (!appUser.getPassword().equalsIgnoreCase(user.getPassword())) {
                 appUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
@@ -58,6 +66,24 @@ public class AppUserService {
 
         return appUserRepository.saveAndFlush(newUser);
     }
+
+    @Transactional(dontRollbackOn = Exception.class)
+    public AppUser addNewUser(AddNewUserByAdminRequest user) {
+        Optional<AppUser> userFromDB = appUserRepository.findByUsername(user.getUsername());
+        if (userFromDB.isPresent()) {
+            throw new UserAlreadyExistException("'" + user.getUsername() + "' is already exists!");
+        }
+
+        AppUser newUser = AppUser.builder()
+                .username(user.getUsername().trim())
+                .password(passwordEncoder.encode(user.getPassword().trim()))
+                .roles(user.getRoles())
+                .active(user.isActive())
+                .build();
+
+        return appUserRepository.saveAndFlush(newUser);
+    }
+
 
     @Transactional
     public List<Long> deleteUserById(DeleteUserRequest deleteUserRequest) {
