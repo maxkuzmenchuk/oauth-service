@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,11 @@ public class MainController {
     public MainController(AppUserService appUserService, HttpServletRequest request) {
         this.appUserService = appUserService;
         this.request = request;
+    }
+
+    @RequestMapping("/auth/validate-user")
+    public Principal user(Principal user) {
+        return user;
     }
 
     @PostMapping("/auth/registration")
