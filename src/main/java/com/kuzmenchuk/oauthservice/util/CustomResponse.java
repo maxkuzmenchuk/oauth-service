@@ -4,8 +4,6 @@ import lombok.*;
 import org.springframework.http.HttpStatus;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,54 +30,19 @@ public class CustomResponse {
     private List<String> error;
 
 
-    public static CustomResponse successResponse(String message, String bodyField, Object bodyValue, String requestUrl) {
+    public static Map<String, Object> successResponse(String message, String bodyField, Object bodyValue) {
         Map<String, Object> bodyMap = new HashMap<>();
         bodyMap.put("message", message);
         bodyMap.put(bodyField, bodyValue);
-        return CustomResponse.builder()
-                .timestamp(Timestamp.valueOf(LocalDateTime.now()))
-                .success(1)
-                .statusCode(HttpStatus.OK.value())
-                .status(HttpStatus.OK)
-                .requestUrl(requestUrl)
-                .body(bodyMap)
-                .error(Collections.emptyList())
-                .build();
+
+        return bodyMap;
     }
 
-    public static CustomResponse errorResponse(HttpStatus status, String error, String requestUrl) {
-        return CustomResponse.builder()
-                .timestamp(Timestamp.valueOf(LocalDateTime.now()))
-                .success(0)
-                .statusCode(status.value())
-                .status(status)
-                .requestUrl(requestUrl)
-                .body(null)
-                .error(Collections.singletonList(error))
-                .build();
-    }
+    public static Map<String, Object> errorResponse(String message, Object bodyValue) {
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("message", message);
+        bodyMap.put("error_message", bodyValue);
 
-    public static CustomResponse forbiddenResponse(String error, String requestUrl) {
-        return CustomResponse.builder()
-                .timestamp(Timestamp.valueOf(LocalDateTime.now()))
-                .success(0)
-                .statusCode(HttpStatus.FORBIDDEN.value())
-                .status(HttpStatus.FORBIDDEN)
-                .requestUrl(requestUrl)
-                .body(null)
-                .error(Collections.singletonList(error))
-                .build();
-    }
-
-    public static CustomResponse validationErrorResponse(List<String> errors, String requestUrl) {
-        return CustomResponse.builder()
-                .timestamp(Timestamp.valueOf(LocalDateTime.now()))
-                .success(0)
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .status(HttpStatus.BAD_REQUEST)
-                .requestUrl(requestUrl)
-                .body(null)
-                .error(errors)
-                .build();
+        return bodyMap;
     }
 }
