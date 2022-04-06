@@ -207,16 +207,13 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> getUserById(@RequestParam("id") Long id) {
         try {
             AppUser user = appUserService.getAccountById(id);
-            Map<String, Object> body = new HashMap<>();
-            body.put("message", "success");
-            body.put("appUser", user);
+            successResponseBody = CustomResponse.successResponse("success", "appUser", user);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(body);
+                    .body(successResponseBody);
         } catch (UsernameNotFoundException e) {
             errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST.getReasonPhrase(), e.getMessage());
-
 
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
