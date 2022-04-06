@@ -23,7 +23,7 @@ import java.util.Map;
 @RequestMapping("/api/user-account")
 public class MainController {
     private final AppUserService appUserService;
-    private String authorization;
+    private final HttpServletRequest request;
 
     private Map<String, Object> successResponseBody = new HashMap<>();
     private Map<String, Object> errorResponseBody = new HashMap<>();
@@ -31,7 +31,7 @@ public class MainController {
     @Autowired
     public MainController(AppUserService appUserService, HttpServletRequest request) {
         this.appUserService = appUserService;
-        this.authorization = request.getHeader("Authorization");
+        this.request = request;
     }
 
     @RequestMapping("/auth/validate-user")
