@@ -44,7 +44,7 @@ public class MainController {
         try {
 
             AppUser newUser = appUserService.addNewUser(user);
-            successResponseBody = CustomResponse.successResponse("New user registered successfully!", "newUser", newUser);
+            successResponseBody = CustomResponse.successResponse("New user registered successfully!", newUser);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -68,7 +68,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> addNewByAdmin(@RequestBody AddNewUserByAdminRequest userByAdminRequest) {
         try {
             AppUser newUser = appUserService.addNewUser(userByAdminRequest);
-            successResponseBody = CustomResponse.successResponse("User added successfully!", "newUser", newUser);
+            successResponseBody = CustomResponse.successResponse("User added successfully!", newUser);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -93,7 +93,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> update(@RequestBody UpdateUserRequest appUser) {
         try {
             AppUser updUser = appUserService.update(appUser.getId(), appUser);
-            successResponseBody = CustomResponse.successResponse("User updated successfully!", "updUser", updUser);
+            successResponseBody = CustomResponse.successResponse("User updated successfully!", updUser);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -118,7 +118,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> delete(@RequestBody DeleteUserRequest deleteUserRequest) {
         try {
             List<Long> deletedIDs = appUserService.deleteUserById(deleteUserRequest);
-            successResponseBody = CustomResponse.successResponse("Users are deleted successfully", "IDs", deletedIDs);
+            successResponseBody = CustomResponse.successResponse("Users are deleted successfully", deletedIDs);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -142,7 +142,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> changeActiveStatus(@RequestBody ChangeActiveStatusRequest changeActiveStatusRequest) {
         try {
             Long updateUserID = appUserService.changeActiveStatus(changeActiveStatusRequest);
-            successResponseBody = CustomResponse.successResponse("Status active changed successfully", "updatedUserID", updateUserID);
+            successResponseBody = CustomResponse.successResponse("Status active changed successfully", updateUserID);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -166,7 +166,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> changeRole(@RequestBody ChangeRoleRequest changeRoleRequest) {
         try {
             Map<String, Object> result = appUserService.changeRoleById(changeRoleRequest);
-            successResponseBody = CustomResponse.successResponse("Users roles are changed successfully", "roles", result);
+            successResponseBody = CustomResponse.successResponse("Users roles are changed successfully", result);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -189,7 +189,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> getAllUsers() {
         try {
             List<AppUser> appUserList = appUserService.getAll();
-            successResponseBody = CustomResponse.successResponse("Success", "appUserList", appUserList);
+            successResponseBody = CustomResponse.successResponse("Success", appUserList);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -207,7 +207,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> getUserById(@RequestParam("id") Long id) {
         try {
             AppUser user = appUserService.getAccountById(id);
-            successResponseBody = CustomResponse.successResponse("success", "appUser", user);
+            successResponseBody = CustomResponse.successResponse("success", user);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
@@ -231,7 +231,7 @@ public class MainController {
     public ResponseEntity<Map<String, Object>> getUserByUsername(@RequestParam("username") String username) {
         try {
             AppUser user = appUserService.getAccountByUsername(username);
-            successResponseBody = CustomResponse.successResponse("Success", "appUser", user);
+            successResponseBody = CustomResponse.successResponse("Success", user);
 
             return ResponseEntity
                     .status(HttpStatus.OK)

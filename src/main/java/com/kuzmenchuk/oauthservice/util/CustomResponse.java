@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CustomResponse {
-    public static Map<String, Object> successResponse(String message, String bodyField, Object bodyValue) {
+    public static Map<String, Object> successResponse(String message, Object bodyValue) {
         Map<String, Object> bodyMap = new HashMap<>();
         bodyMap.put("message", message);
-        bodyMap.put(bodyField, bodyValue);
+        bodyMap.put("entity", bodyValue);
 
         return bodyMap;
     }

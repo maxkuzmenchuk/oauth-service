@@ -86,7 +86,7 @@ public class AppUserService {
 
 
     @Transactional
-    public List<Long> deleteUserById(DeleteUserRequest deleteUserRequest) {
+    public List<Long> deleteUserById(DeleteUserRequest deleteUserRequest) throws Exception {
         List<Long> deletedIDs = new ArrayList<>();
         Long[] ids = deleteUserRequest.getDeleteIDs();
         Long authUserID = deleteUserRequest.getAuthUserID();
@@ -95,6 +95,8 @@ public class AppUserService {
             if (!Objects.equals(id, authUserID)) {
                 appUserRepository.deleteById(id);
                 deletedIDs.add(id);
+            } else {
+                throw new Exception("You can't delete credentials for yourself");
             }
         }
 
