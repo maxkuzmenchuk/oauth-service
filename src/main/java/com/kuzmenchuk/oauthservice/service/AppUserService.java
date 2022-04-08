@@ -84,6 +84,23 @@ public class AppUserService {
         return appUserRepository.saveAndFlush(newUser);
     }
 
+    @Transactional(dontRollbackOn = Exception.class)
+    public AppUser addNewUser(AppUser user) {
+        Optional<AppUser> userFromDB = appUserRepository.findByUsername(user.getUsername());
+        if (userFromDB.isPresent()) {
+            throw new UserAlreadyExistException("'" + user.getUsername() + "' is already exists!");
+        }
+
+        AppUser newUser = AppUser.builder()
+                .username(user.getUsername().trim())
+                .password(passwordEncoder.encode(user.getPassword().trim()))
+                .roles(user.getRoles())
+                .active(user.isActive())
+                .build();
+
+        return appUserRepository.saveAndFlush(newUser);
+    }
+
 
     @Transactional
     public List<Long> deleteUserById(DeleteUserRequest deleteUserRequest) throws Exception {

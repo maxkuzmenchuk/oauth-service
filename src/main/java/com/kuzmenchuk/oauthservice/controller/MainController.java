@@ -2,8 +2,10 @@ package com.kuzmenchuk.oauthservice.controller;
 
 import com.kuzmenchuk.oauthservice.exception.UserAlreadyExistException;
 import com.kuzmenchuk.oauthservice.repository.entities.AppUser;
+import com.kuzmenchuk.oauthservice.repository.entities.PersonalData;
 import com.kuzmenchuk.oauthservice.service.AppUserService;
 import com.kuzmenchuk.oauthservice.util.CustomResponse;
+import com.kuzmenchuk.oauthservice.util.PostRequestsToExternalServices;
 import com.kuzmenchuk.oauthservice.util.requests.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -85,6 +87,40 @@ public class MainController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(errorResponseBody);
+        }
+    }
+
+    @PostMapping("/add-new-account-with-personal-data")
+    public ResponseEntity<Map<String, Object>> addAccountWithPersonalData(@RequestBody AddCredentialWithPersonalDataRequest addCredentialWithPersonalDataRequest) {
+        PostRequestsToExternalServices postRequestsToExternalServices = new PostRequestsToExternalServices();
+        try {
+            AppUser credentials = addCredentialWithPersonalDataRequest.getCredentials();
+            PersonalData personalData = addCredentialWithPersonalDataRequest.getPersonalData();
+
+            AppUser createdUser = appUserService.addNewUser(credentials);
+            PersonalData createdPersonalData = postRequestsToExternalServices.addNewPersonalData(createdUser.getId(), personalData, request.getHeader("Authorization"));
+
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("createdUser", createdUser);
+            resultMap.put("createdPersonalData", createdPersonalData);
+
+            successResponseBody = CustomResponse.successResponse("Account successfully created", resultMap);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(successResponseBody);
+        } catch (UserAlreadyExistException e) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.BAD_REQUEST.getReasonPhrase(), e.getMessage());
+
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(errorResponseBody);
+        } catch (Exception exception) {
+            errorResponseBody = CustomResponse.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), exception.getMessage());
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponseBody);
+
         }
     }
 
